@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div>
+    <img src={{url_for("static", filename="logo.jpg")}} class="logo" />
+</div>
+<div class="container">    
+<p>    
+    {% if message %}
+    <p class="message">{{ message | safe }}</p>
+    {% endif %}
+</p> 
+<p>
+    <form action = "/sing_up" method = "post">
+        <h1>Sing up</h1>
+        <p><input type = "text" name = "username" placeholder="Username"></p>
+        <p><input type = "text" name = "password" placeholder="Password"></p>
+        <p><input type = "text" name = "re_password" placeholder="Confirm password"></p>
+        <button type="submit" class="btn btn-primary">Sing up</button>
+    </form>
+</p>
+<p>
+    <a href="{{ url_for('index') }}">I have an account</a></p>
+</div>
+
+{% endblock %}
