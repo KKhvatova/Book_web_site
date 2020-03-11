@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<!--
 <div>
     <img src={{url_for("static", filename="logo.jpg")}} class="logo"/>
 </div>
+-->
 <div class="container">    
 <p>    
     {% if message %}
@@ -14,7 +16,7 @@
     <form action = "/sing_in" method = "post">
         <h1>Sing in</h1>
         <p><input type = "text" name = "username" placeholder="Username"></p>
-        <p><input type = "text" name = "password" placeholder="Password"></p>
+        <p><input type = "password" name = "password" placeholder="Password"></p>
         <button type="submit" class="btn btn-primary">Sing in</button>
     </form>
 </p>

@@ -12,7 +12,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "env": {
-                "DATABASE_URL": "postgres://edlgqezpzcslwb:6da4bb42ec0d4be03b71861515f2e44370772b8bce36e6f6ba78c09635dc5e1d@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/d5mljhskjkg8c"
+                "DATABASE_URL": "postgresql://postgres:123456@127.0.0.3/book_user"
             },
         },
         {

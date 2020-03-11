@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book
+{% endblock %}
+
+{% block body %}
+<div>
+    <div class="text-right mb-3">
+        <form action = "/">
+            <button type="submit" class="btn btn-primary">Log out</button>
+        </form>
+    </div>
+    <br>
+    <h2 align="center">Book details</h2>
+    <ul>
+            <br> 
+            <li>Title: {{ book.title }}</a></li>
+            <li>Author: {{ book.author }}</li>
+            <li>Year: {{ book.year }}</li>
+            <li>ISBN number: {{book.isbn}}</li>
+    </ul>
+</div>
+{% endblock %}

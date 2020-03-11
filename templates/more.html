@@ -1,12 +1,19 @@
 {% extends "layout.html" %}
 
 {% block heading %}
-    Second Page
 {% endblock %}
 
 {% block body %}
+<div class = 'main'>
+<div class="text-right mb-3">
+    <form action = "/">
+        <button type="submit" class="btn btn-primary">Log out</button>
+    </form>
+</div><br>
+<div>
     <p>
         Donec lobortis dapibus magna, quis facilisis velit malesuada a. Nunc iaculis augue nulla, sed sodales dui volutpat lacinia. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nullam non lorem eget augue auctor feugiat at ut justo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec lectus eget diam tempor aliquam sit amet sed augue.
     </p>
-
+</div>
+</div>
 {% endblock %}

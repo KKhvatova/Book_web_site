@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div> 
+    <div class="text-right mb-3">
+        <form action = "/">
+            <button type="submit" class="btn btn-primary">Log out</button>
+        </form>
+    </div>
+    <br>  
+        <p>    
+            {% if message %}
+            <p class="message">{{ message | safe }}</p>
+            {% endif %}
+        </p>
+        <p class = 'main'>
+            <form action = "/result" method = "get">
+                <h1>Search</h1>
+                <p><input type = "text" name = "isbn" placeholder="ISBN"></p>
+                <p><input type = "text" name = "title" placeholder="Title"></p>
+                <p><input type = "text" name = "author" placeholder="Author"></p>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </p>
+</div>
+
+{% endblock %}
