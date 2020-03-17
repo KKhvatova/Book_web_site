@@ -5,15 +5,48 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
-        <link rel="stylesheet" href={{url_for("static", filename="style.css")}}/>
-    </head>
-    <body class ='container'>
-        <div>
-            <img src={{url_for("static", filename="logo.jpg")}} class="logo" />
-        </div>
-        <h1>{% block heading %}{% endblock %}</h1>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 
-        {% block body %}
-        {% endblock %}
+        <link rel="stylesheet" href={{url_for("static", filename="style.css")}}/>
+
+    </head>
+    <body style="margin:10;padding:10"> 
+        <div>
+            <img src={{url_for("static", filename="book.jpg")}} class='logo' />
+        </div>
+
+        <br>
+        <div class='container'>
+            <h1>{% block heading %}{% endblock %}</h1>
+
+            <div>
+                <p>    
+                    {% if message %}
+                    <p class="message">{{ message }}</p>
+                    {% endif %}
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div>
+                <p>
+                    <p class="message"> {{ message }}</p> <br/>
+                </p>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+
+            {% block body %}
+            {% endblock %}
+        </div>
     </body>
 </html>

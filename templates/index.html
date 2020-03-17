@@ -1,17 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<!--
-<div>
-    <img src={{url_for("static", filename="logo.jpg")}} class="logo"/>
-</div>
--->
-<div class="container">    
-<p>    
-    {% if message %}
-    <p class="message">{{ message | safe }}</p>
-    {% endif %}
-</p> 
+<div>    
 <p>
     <form action = "/sing_in" method = "post">
         <h1>Sing in</h1>

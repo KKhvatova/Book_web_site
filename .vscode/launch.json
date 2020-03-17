@@ -24,7 +24,8 @@
                 "FLASK_APP": "app.py",
                 "DATABASE_URL": "postgresql://postgres:123456@127.0.0.3/book_user",
                 "FLASK_ENV": "development",
-                "FLASK_DEBUG": "0"
+                "FLASK_DEBUG": "0",
+                "GOODREADS_KEY": "1nvviUgKgxSCw2L1yhD42g"
             },
             "args": [
                 "run",

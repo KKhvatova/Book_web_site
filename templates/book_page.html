@@ -11,14 +11,60 @@
             <button type="submit" class="btn btn-primary">Log out</button>
         </form>
     </div>
+
     <br>
+    <div align="center">
     <h2 align="center">Book details</h2>
-    <ul>
-            <br> 
-            <li>Title: {{ book.title }}</a></li>
-            <li>Author: {{ book.author }}</li>
-            <li>Year: {{ book.year }}</li>
-            <li>ISBN number: {{book.isbn}}</li>
-    </ul>
+          <br> 
+            {% if book %}
+            Title: {{ book.title }} <br/>
+            Author: {{ book.author }} <br/>
+            Year: {{ book.year }} <br/>
+            ISBN number: {{book.isbn}} <br/>
+            {% if average_rating %} Average score: {{ average_rating }}<br/>{% endif %}
+            {% if ratings_count %} Review count: {{ ratings_count }}<br/>{% endif %}
+            {% endif %}
+    </div>
+    <br>
+
+    {% if comments %}
+    <div align="center">
+      <h4>Some comments from other users</h4>
+      <hr style="height:4px;border-top:1px solid #a4edf7" />
+      {% for comment in comments %}
+        <div class="card bg-light mb-3" style="max-width: 18rem;">
+          <div class="card-body">
+          <p class="card-text">{{ comment.comment }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+    </div>
+
+
+    <hr style="height:4px;border-top:1px solid #a4edf7" />
+    <div align="center">
+      <form action="/submit_review" method="POST">
+        <div class="form-group">
+          <h4>Please rate the book</h4>
+          <input type="radio" name="rating" value="1" /> 1
+          <input type="radio" name="rating" value="2" /> 2
+          <input type="radio" name="rating" value="3" /> 3
+          <input type="radio" name="rating" value="4" /> 4
+          <input type="radio" name="rating" value="5" /> 5
+        </div>
+        <div class="form-group">
+          <h4>Leave some comments</h4>
+          <textarea
+            name="comments"
+            id=""
+            cols="30"
+            rows="10"
+            placeholder="Tell something about this book"
+          ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
 </div>
 {% endblock %}

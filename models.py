@@ -30,4 +30,20 @@ class Book(db.Model):
         self.title = title
         self.author = author
         self.year = year
+
+class Review(db.Model):
+
+    __tablename__='reviews'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, index=False, nullable=False)
+    book_isbn = db.Column(db.String(80), index=False, nullable=False)
+    comment = db.Column(db.String(80), index=False, nullable=False)
+    rating = db.Column(db.String(80), index=False, nullable=False)
+
+    def __init__(self, user_id, book_isbn, comment, rating):
+        self.user_id = user_id
+        self.book_isbn = book_isbn
+        self.comment = comment
+        self.rating = rating
+    
         

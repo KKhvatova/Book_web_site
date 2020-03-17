@@ -12,14 +12,14 @@
         </form>
     </div>
     <br>
-    <h2 align="center">Here is what we found on your request</h2>
-    <ul>
-        {% for result in results %}
-            <br> 
-            <li><a href="{{ url_for('book', book_id=result.id) }}" style="color:black">Title: {{ result.title }}</a></li>
-            <li>Author: {{ result.author }}</li>
-            <li>Year: {{ result.year }}</li>
-        {% endfor %}
-    </ul>
+    <div align="center">
+        <h2 align="center">Here is what we found on your request</h2>
+            {% for result in results %}
+                <br> 
+                <a href="{{ url_for('book', book_id=result.id) }}" style="color:black">Title: {{ result.title }}</a><br/>
+                Author: {{ result.author }}<br/>
+                Year: {{ result.year }}<br/>
+            {% endfor %}
+    </div>
 </div>
 {% endblock %}
