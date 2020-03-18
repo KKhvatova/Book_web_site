@@ -1,4 +1,5 @@
 from flask import Flask, flash, render_template, request, session, redirect, jsonify
+from flask import abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from sqlalchemy import create_engine
@@ -29,19 +30,21 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
 
-#db.init_app(app)
-#with app.app_context():
-#    db.create_all()
+# Set up database
+engine = create_engine(os.getenv("DATABASE_URL"))
+db = scoped_session(sessionmaker(bind=engine))
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return('more.html')
+    #return render_template('index.html')
+
 
 @app.route("/sing_in", methods=['POST'])
 def sing_in(): 
-    '''sing in if you are have account'''
+    #sing in if you are have account
 
     # Forget any user_id
     session.clear()
@@ -70,7 +73,7 @@ def register():
 
 @app.route("/sing_up", methods=["POST"])
 def sing_up():
-    '''Create an accout'''
+    # Create an accout
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -160,20 +163,32 @@ def submit_review():
             flash('Provide rating and some comment to the book')
             return redirect("/result/" + book_id) #, message='Provide rating and some comment to the book')
 
-@app.route("/api/<int:isbn>")
+
+@app.route("/api/<isbn>")
 def return_json(isbn):
 
-    result = db.execute("SELECT title, author, year, isbn, \
-                    COUNT(reviews.id) as review_count, \
-                    AVG(reviews.rating) as average_score \
-                    FROM books \
-                    INNER JOIN reviews \
-                    ON books.id = reviews.book_id \
-                    WHERE isbn = :isbn \
-                    GROUP BY title, author, year, isbn",
-                    {"isbn": isbn})
+    isbn = str(isbn)
+    result = db.execute('SELECT title, author, year, isbn, \
+                        COUNT(reviews.id) as review_count, \
+                        AVG(CAST(reviews.rating AS int)) as average_score \
+                        FROM books \
+                        LEFT JOIN reviews \
+                        ON books.isbn = reviews.book_isbn \
+                        WHERE isbn = :isbn \
+                        GROUP BY title, author, year, isbn', 
+                        {'isbn': isbn})
+    
+    if result.rowcount < 1:
+        #return jsonify({"Error": "Invalid book ISBN"}), 422
+        abort(404)
 
-    return jsonify(result)
+    # Fetch result from RowProxy    
+    tmp = result.fetchone()
+    result = dict(tmp.items())
+    if result['average_score']:
+        result['average_score'] = float('%.2f'%(result['average_score']))
+
+    return jsonify({'result': result})
 
 if __name__ == '__main__':
     app.run()
