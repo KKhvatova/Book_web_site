@@ -17,10 +17,10 @@
     <h2 align="center">Book details</h2>
           <br> 
             {% if book %}
-            Title: {{ book.title }} <br/>
-            Author: {{ book.author }} <br/>
-            Year: {{ book.year }} <br/>
-            ISBN number: {{book.isbn}} <br/>
+            Title: {{ book[2] }} <br/>
+            Author: {{ book[3] }} <br/>
+            Year: {{ book[4] }} <br/>
+            ISBN number: {{book[1]}} <br/>
             {% if average_rating %} Average score: {{ average_rating }}<br/>{% endif %}
             {% if ratings_count %} Review count: {{ ratings_count }}<br/>{% endif %}
             {% endif %}
@@ -34,7 +34,7 @@
       {% for comment in comments %}
         <div class="card bg-light mb-3" style="max-width: 18rem;">
           <div class="card-body">
-          <p class="card-text">{{ comment.comment }}</p>
+          <p class="card-text">{{ comment[3] }}</p>
           </div>
         </div>
       {% endfor %}

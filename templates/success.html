@@ -16,9 +16,9 @@
         <h2 align="center">Here is what we found on your request</h2>
             {% for result in results %}
                 <br> 
-                <a href="{{ url_for('book', book_id=result.id) }}" style="color:black">Title: {{ result.title }}</a><br/>
-                Author: {{ result.author }}<br/>
-                Year: {{ result.year }}<br/>
+                <a href="{{ url_for('book', book_id=result[0]) }}" style="color:black">Title: {{ result[2] }}</a><br/>
+                Author: {{ result[3] }}<br/>
+                Year: {{ result[4] }}<br/>
             {% endfor %}
     </div>
 </div>

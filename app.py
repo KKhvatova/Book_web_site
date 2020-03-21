@@ -30,17 +30,13 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-#db = SQLAlchemy(app)
-
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 @app.route('/')
 def index():
-    return('more.html')
-    #return render_template('index.html')
-
+    return render_template('index.html')
 
 @app.route("/sing_in", methods=['POST'])
 def sing_in(): 
@@ -55,11 +51,12 @@ def sing_in():
         #print(username, password)
         if username == '' or password == '':
             return render_template('index.html', message='Please enter required fields')
-        if db.session.query(User).filter(User.username == username, User.password == password).count() == 0:
-            return render_template('index.html', message ='The email or password you entered is invalid')
-        
-        result = db.session.query(User).filter(User.username == username, User.password == password).first()
-        
+
+        result = db.execute('SELECT * FROM users WHERE username=:username and password=:password',
+                            {"username": username, "password": password}).fetchone()
+        if result == None:
+            return render_template('index.html', message ='The email or the password you entered is invalid')
+
         # Remember which user has logged in
         session["user_id"] = result.id
         session["username"] = result.username
@@ -71,6 +68,7 @@ def sing_in():
 def register():
     return render_template('index_2.html')
 
+
 @app.route("/sing_up", methods=["POST"])
 def sing_up():
     # Create an accout
@@ -78,31 +76,43 @@ def sing_up():
         username = request.form['username']
         password = request.form['password']
         re_password = request.form['re_password']
-        #print(username, password)
+        
         if username == '' or password == '' or re_password == '':
             return render_template('index_2.html', message='Please enter required fields')
         if password != re_password:
             return render_template('index_2.html', message='Your password and confirmation password do not match')
-        if db.session.query(User).filter(User.username == username).count() == 1:
-            return render_template('index_2.html', message='This account already exists')
+        
+        result = db.execute('SELECT * FROM users WHERE username=:username', {"username": username}).fetchone()
+        
+        if result:
+            return render_template('index_2.html', message='The account with this username already exists')
         else:
             data = User(username, password)
             db.session.add(data)
             db.session.commit()
             return render_template('success.html')
 
+
 @app.route("/result", methods = ["GET"])
 def search():
     if request.method == 'GET':
-        isbn = request.args.get('isbn')
-        title = request.args.get('title')
-        author = request.args.get('author')
-        if isbn == '' and title == '' and author == '':
-            return render_template('search.html', message='Please enter al least one field')
-        if db.session.query(Book).filter(or_(Book.isbn == isbn, Book.title == title, Book.author == author)).count() == 0:
+        query_for_book = request.args.get('query_for_book')
+        if query_for_book == '':
+            return render_template('search.html', message='Please enter isbn, title or author of the book')
+        
+        #change to use in LIKE sql
+        query_for_book = '%'+query_for_book+'%'
+
+        results = db.execute('SELECT * \
+                            FROM books \
+                            WHERE books.isbn LIKE :query_for_book OR \
+                            books.title LIKE :query_for_book OR \
+                            books.author LiKE :query_for_book LIMIT 10',
+                            {"query_for_book": query_for_book}).fetchall()
+
+        if len(results) == 0: 
             return render_template('search.html', message='There is no match')
         else:
-            results = db.session.query(Book).filter(or_(Book.isbn == isbn, Book.title == title, Book.author == author))
             return render_template('success.html', results=results)
 
 @app.route("/result/<int:book_id>")
@@ -110,23 +120,23 @@ def book(book_id):
     """List details about a single book."""
 
     # Make sure book exists.
-    book = db.session.query(Book).filter(Book.id == book_id).first()
+    book = db.execute('Select * FROM books WHERE books.id=:book_id', {"book_id": book_id}).fetchall()
     if book is None:
         return render_template("error.html", message="No such book.")
     #if the book exists
     else:
         #check reviews
-        session['book_id'] = book_id
-        session['book_isbn'] = book.isbn
-        num_review = db.session.query(Review).filter(Review.book_isbn == book.isbn).count()
-
+        session['book_id'] = book[0][0]
+        session['book_isbn'] = book[0][1]
+        review = db.execute('SELECT * FROM reviews WHERE reviews.book_isbn=:book_isbn', {"book_isbn":book[0][1]}).fetchall()
+        
         #check GOODREADS reviews
         # Read API key from env variable
         key = os.getenv("GOODREADS_KEY")
         
         # Query the api with key and ISBN as parameters
         query = requests.get("https://www.goodreads.com/book/review_counts.json",
-                params={"key": key, "isbns": book.isbn})
+                params={"key": key, "isbns": book[0][1]})
 
         # Convert the response to JSON
         response = query.json()
@@ -134,18 +144,11 @@ def book(book_id):
         average_rating = response['average_rating']
         ratings_count = response['ratings_count']
 
-        # add var to the session
-        #session['average_rating'] = average_rating
-        #session['ratings_count'] = ratings_count
-        #session['book'] = book
-
-        if num_review > 0:
-            review = db.session.query(Review).filter(Review.book_isbn == book.isbn)
-            #session['review'] = review
-            return render_template("book_page.html", book=book, comments=review, average_rating=average_rating, ratings_count=ratings_count)
+        if len(review) > 0:
+            return render_template("book_page.html", book=book[0], comments=review, average_rating=average_rating, ratings_count=ratings_count)
         else:
-            return render_template("book_page.html", book=book, comments=None, average_rating=average_rating, ratings_count=ratings_count)
-        
+            return render_template("book_page.html", book=book[0], comments=None, average_rating=average_rating, ratings_count=ratings_count)
+     
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
     if request.method == 'POST':
@@ -161,9 +164,9 @@ def submit_review():
         except:
             book_id = str(session['book_id'])
             flash('Provide rating and some comment to the book')
-            return redirect("/result/" + book_id) #, message='Provide rating and some comment to the book')
+            return redirect("/result/" + book_id) 
 
-
+'''
 @app.route("/api/<isbn>")
 def return_json(isbn):
 
@@ -189,6 +192,8 @@ def return_json(isbn):
         result['average_score'] = float('%.2f'%(result['average_score']))
 
     return jsonify({'result': result})
+
+'''
 
 if __name__ == '__main__':
     app.run()
