@@ -68,6 +68,9 @@ def sing_in():
 def register():
     return render_template('index_2.html')
 
+@app.route('/search_page')
+def search_page():
+    return render_template('search.html')
 
 @app.route("/sing_up", methods=["POST"])
 def sing_up():
@@ -87,11 +90,12 @@ def sing_up():
         if result:
             return render_template('index_2.html', message='The account with this username already exists')
         else:
-            data = User(username, password)
-            db.session.add(data)
-            db.session.commit()
-            return render_template('success.html')
-
+            # Insert user in db
+            db.execute("INSERT INTO users (username, password) VALUES (:username, :password)",
+                        {"username": username, "password": password})
+            # Commit changes to database
+            db.commit()
+            return render_template('search.html')
 
 @app.route("/result", methods = ["GET"])
 def search():
@@ -156,11 +160,15 @@ def submit_review():
             if request.form['rating'] and request.form['comments']:
                 rating = request.form['rating']
                 comment = request.form['comments']
-                # add to db
-                review = Review(user_id=session["user_id"], book_isbn=session["book_isbn"], comment=comment, rating=rating)
-                db.session.add(review)
-                db.session.commit()
-                return render_template('success.html')
+                ## Insert review in db
+                db.execute("INSERT INTO reviews (user_id, book_isbn, comment, rating) VALUES (:user_id, :book_isbn, :comment, :rating)",
+                            {"user_id": str(session['user_id']), 
+                            "book_isbn": str(session['book_isbn']), 
+                            "comment": comment, 
+                            "rating": rating})
+                # Commit changes to database
+                db.commit()
+                return render_template('success.html', message='Thank you for your review')
         except:
             book_id = str(session['book_id'])
             flash('Provide rating and some comment to the book')
