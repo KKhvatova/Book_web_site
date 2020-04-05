@@ -13,7 +13,11 @@
     </div>
     <br>
     <div align="center">
-        <h2 align="center">Here is what we found on your request</h2>
+        
+            {% if my_title %}
+                <h2 align="center"> {{ my_title }}  </h2>
+            {% endif %}
+       
             {% for result in results %}
                 <br> 
                 <a href="{{ url_for('book', book_id=result[0]) }}" style="color:black">Title: {{ result[2] }}</a><br/>

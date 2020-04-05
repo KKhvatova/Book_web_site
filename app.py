@@ -95,6 +95,13 @@ def sing_up():
                         {"username": username, "password": password})
             # Commit changes to database
             db.commit()
+
+            # Remember the new user in session
+            result = db.execute('SELECT * FROM users WHERE username=:username', {"username": username}).fetchone()
+
+            session["user_id"] = result.id
+            session["username"] = result.username
+
             return render_template('search.html')
 
 @app.route("/result", methods = ["GET"])
@@ -117,7 +124,7 @@ def search():
         if len(results) == 0: 
             return render_template('search.html', message='There is no match')
         else:
-            return render_template('success.html', results=results)
+            return render_template('success.html', results=results, my_title = 'Here is what we found on your request')
 
 @app.route("/result/<int:book_id>")
 def book(book_id):
@@ -157,24 +164,33 @@ def book(book_id):
 def submit_review():
     if request.method == 'POST':
         try:
-            if request.form['rating'] and request.form['comments']:
-                rating = request.form['rating']
-                comment = request.form['comments']
-                ## Insert review in db
-                db.execute("INSERT INTO reviews (user_id, book_isbn, comment, rating) VALUES (:user_id, :book_isbn, :comment, :rating)",
-                            {"user_id": str(session['user_id']), 
-                            "book_isbn": str(session['book_isbn']), 
-                            "comment": comment, 
-                            "rating": rating})
-                # Commit changes to database
-                db.commit()
-                return render_template('success.html', message='Thank you for your review')
+            # check if first riview
+            result = db.execute('SELECT * FROM reviews WHERE reviews.book_isbn=:book_isbn AND reviews.user_id=:user_id', 
+                                {"book_isbn": str(session['book_isbn']), "user_id": session['user_id']}).fetchall()
+            if len(result) > 0:
+                book_id = str(session['book_id'])
+                flash('You already left the review for this book')
+                return redirect("/result/" + book_id)
+            
+            else:
+                if request.form['rating'] and request.form['comments']:
+                    rating = request.form['rating']
+                    comment = request.form['comments']
+                    ## Insert review in db
+                    db.execute("INSERT INTO reviews (user_id, book_isbn, comment, rating) VALUES (:user_id, :book_isbn, :comment, :rating)",
+                                {"user_id": str(session['user_id']), 
+                                "book_isbn": str(session['book_isbn']), 
+                                "comment": comment, 
+                                "rating": rating})
+                    # Commit changes to database
+                    db.commit()
+                    return render_template('success.html', message='Thank you for your review')
         except:
-            book_id = str(session['book_id'])
-            flash('Provide rating and some comment to the book')
-            return redirect("/result/" + book_id) 
+                book_id = str(session['book_id'])
+                flash('Provide rating and some comment to the book')
+                return redirect("/result/" + book_id) 
 
-'''
+
 @app.route("/api/<isbn>")
 def return_json(isbn):
 
@@ -201,7 +217,6 @@ def return_json(isbn):
 
     return jsonify({'result': result})
 
-'''
 
 if __name__ == '__main__':
     app.run()
